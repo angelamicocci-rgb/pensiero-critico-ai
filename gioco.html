@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cyber Crisis — Gioco di pensiero critico</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--cp-bg); color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1000px, calc(100% - 28px)); margin: 0 auto; padding: 22px 0 48px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .mark {
+      width: 40px; height: 40px; display: grid; place-items: center; border-radius: 0.625rem;
+      background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 900;
+    }
+    h1 { margin: 0; font-size: 20px; }
+    header p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+    a { color: var(--cp-link); }
+    .back { text-decoration: none; font-size: 13px; font-weight: 700; }
+    .card {
+      background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+    }
+    .start { padding: clamp(24px, 5vw, 48px); text-align: center; }
+    .eyebrow { color: var(--cp-accent); font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .start h2 { margin: 10px auto; max-width: 720px; font-size: clamp(32px, 6vw, 58px); line-height: 1.02; letter-spacing: -.045em; }
+    .start > p { max-width: 680px; margin: 0 auto; color: var(--cp-text-muted); line-height: 1.55; }
+    .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px 0; text-align: left; }
+    .mission { padding: 14px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+    .mission strong { display: block; margin-bottom: 5px; font-size: 13px; }
+    .mission span { color: var(--cp-text-muted); font-size: 12px; line-height: 1.4; }
+    .name-row { display: flex; gap: 8px; max-width: 480px; margin: 0 auto; }
+    input {
+      flex: 1; min-width: 0; padding: 11px 13px; border: 1px solid var(--cp-border);
+      border-radius: 0.625rem; background: var(--cp-bg-elevated); color: var(--cp-text); outline: none;
+    }
+    input:focus { border-color: var(--cp-accent); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+    .btn {
+      border: 1px solid var(--cp-border); border-radius: 0.625rem; padding: 10px 14px;
+      background: var(--cp-surface); color: var(--cp-text); font-weight: 800;
+    }
+    .btn.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .btn.primary:hover { background: var(--cp-accent-hover); }
+    .game { display: none; }
+    .hud { display: grid; grid-template-columns: 1fr auto; gap: 14px; margin-bottom: 14px; padding: 15px 17px; }
+    .progress-copy { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+    .track { height: 8px; overflow: hidden; border-radius: 999px; background: var(--cp-surface-soft); }
+    .fill { height: 100%; width: 0; border-radius: inherit; background: var(--cp-accent); transition: width .35s ease; }
+    .points { min-width: 105px; text-align: right; }
+    .points strong { display: block; font-size: 25px; line-height: 1; }
+    .points span { color: var(--cp-text-muted); font-size: 11px; }
+    .scenario { padding: clamp(20px, 4vw, 34px); }
+    .meta { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .tag { padding: 5px 8px; border-radius: 999px; background: var(--cp-accent-soft); color: var(--cp-accent); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+    .scenario h2 { margin: 0 0 12px; font-size: clamp(25px, 4vw, 38px); letter-spacing: -.03em; }
+    .story { margin: 0 0 22px; color: var(--cp-text-muted); font-size: 16px; line-height: 1.65; }
+    .evidence {
+      margin-bottom: 20px; padding: 14px; border-left: 4px solid var(--cp-accent);
+      border-radius: 0 0.625rem 0.625rem 0; background: var(--cp-accent-soft);
+    }
+    .evidence strong { display: block; margin-bottom: 4px; font-size: 12px; }
+    .evidence p { margin: 0; font-size: 13px; line-height: 1.5; }
+    .choices { display: grid; gap: 10px; }
+    .choice {
+      width: 100%; padding: 15px; text-align: left; border: 1px solid var(--cp-border);
+      border-radius: 0.625rem; background: var(--cp-bg-elevated); color: var(--cp-text);
+    }
+    .choice:hover { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .choice strong { display: block; margin-bottom: 4px; }
+    .choice span { color: var(--cp-text-muted); font-size: 12px; line-height: 1.4; }
+    .feedback { display: none; margin-top: 18px; padding: 18px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); }
+    .feedback.show { display: block; }
+    .feedback h3 { margin: 0 0 8px; }
+    .feedback p { margin: 6px 0; color: var(--cp-text-muted); font-size: 13px; line-height: 1.5; }
+    .feedback .lesson { color: var(--cp-text); }
+    .feedback-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .result { display: none; padding: clamp(24px, 5vw, 48px); }
+    .result h2 { margin: 8px 0; font-size: clamp(32px, 5vw, 52px); letter-spacing: -.04em; }
+    .result-intro { color: var(--cp-text-muted); line-height: 1.55; }
+    .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0; }
+    .score-box { padding: 17px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+    .score-box strong { display: block; font-size: 27px; }
+    .score-box span { color: var(--cp-text-muted); font-size: 12px; }
+    .debrief { padding: 17px; border-left: 4px solid var(--cp-accent); border-radius: 0 0.625rem 0.625rem 0; background: var(--cp-accent-soft); }
+    .debrief h3 { margin: 0 0 8px; }
+    .debrief p { margin: 5px 0; font-size: 13px; line-height: 1.5; }
+    .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .hidden { display: none !important; }
+    @media (max-width: 650px) {
+      .mission-grid, .score-grid { grid-template-columns: 1fr; }
+      .name-row { flex-direction: column; }
+      .hud { grid-template-columns: 1fr; }
+      .points { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="mark">CC</div><div><h1>Cyber Crisis</h1><p>Simulazione di cybersecurity e pensiero critico</p></div></div>
+      <a class="back" href="index.html">← Torna a ClearLens</a>
+    </header>
+
+    <section class="card start" id="start">
+      <div class="eyebrow">Missione interattiva</div>
+      <h2>La rete della scuola è sotto attacco.</h2>
+      <p>Hai cinque decisioni per contenere l'incidente. Le informazioni saranno incomplete: dovrai verificare le prove, riconoscere i bias e scegliere una strategia coerente con il modello Cynefin.</p>
+      <div class="mission-grid">
+        <div class="mission"><strong>Difendi</strong><span>Riduci il rischio senza compiere azioni impulsive o irreversibili.</span></div>
+        <div class="mission"><strong>Ragiona</strong><span>Distingui fatti, ipotesi, pressioni sociali e false certezze.</span></div>
+        <div class="mission"><strong>Adatta</strong><span>Usa una strategia diversa nei contesti chiari, complicati, complessi e caotici.</span></div>
+      </div>
+      <div class="name-row">
+        <input id="playerName" maxlength="30" placeholder="Il tuo nome o nickname" aria-label="Nome o nickname">
+        <button class="btn primary" id="startBtn" type="button">Inizia la missione</button>
+      </div>
+    </section>
+
+    <section class="game" id="game">
+      <div class="card hud">
+        <div>
+          <div class="progress-copy"><span id="phaseLabel">Fase 1 di 5</span><span id="timer">Tempo: 60s</span></div>
+          <div class="track"><div class="fill" id="progressFill"></div></div>
+        </div>
+        <div class="points"><strong id="points">0</strong><span>punti totali</span></div>
+      </div>
+      <article class="card scenario">
+        <div class="meta"><span class="tag" id="domain">Cynefin</span><span class="tag" id="risk">Rischio</span></div>
+        <h2 id="scenarioTitle"></h2>
+        <p class="story" id="scenarioStory"></p>
+        <div class="evidence"><strong>Informazioni disponibili</strong><p id="scenarioEvidence"></p></div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback">
+          <h3 id="feedbackTitle"></h3>
+          <p id="feedbackScore"></p>
+          <p><strong>Possibile bias:</strong> <span id="feedbackBias"></span></p>
+          <p><strong>Lente Cynefin:</strong> <span id="feedbackCynefin"></span></p>
+          <p class="lesson" id="feedbackLesson"></p>
+          <div class="feedback-footer"><button class="btn primary" id="nextBtn" type="button">Prossima fase</button></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="card result" id="result">
+      <div class="eyebrow">Missione conclusa</div>
+      <h2 id="resultTitle"></h2>
+      <p class="result-intro" id="resultIntro"></p>
+      <div class="score-grid">
+        <div class="score-box"><strong id="securityScore">0</strong><span>Sicurezza</span></div>
+        <div class="score-box"><strong id="thinkingScore">0</strong><span>Pensiero critico</span></div>
+        <div class="score-box"><strong id="cynefinScore">0</strong><span>Uso di Cynefin</span></div>
+      </div>
+      <div class="debrief">
+        <h3>Debrief personale</h3>
+        <p id="debriefText"></p>
+        <p><strong>Domanda finale:</strong> quale decisione cambieresti se ricevessi una nuova prova?</p>
+      </div>
+      <div class="result-actions">
+        <button class="btn primary" id="replayBtn" type="button">Gioca di nuovo</button>
+        <a class="btn" href="index.html">Analizza una risposta IA</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const scenarios = [
+      {
+        domain: "Confuso → Chiaro", risk: "Phishing", title: "Il messaggio urgente",
+        story: "Ricevi un'e-mail firmata “Segreteria scolastica”. Dice che il tuo account verrà sospeso entro 15 minuti se non confermi subito la password tramite un link.",
+        evidence: "Il logo sembra corretto. Il mittente usa un dominio simile, ma non identico, a quello della scuola. Un compagno dice di aver già effettuato l'accesso.",
+        choices: [
+          { title: "Apro il link", text: "Il logo è corretto e un compagno lo ha già fatto.", s: 0, t: 0, c: 1, bias: "Autorità, effetto gregge e urgenza.", lesson: "Aspetto grafico e comportamento altrui non verificano l'identità del mittente.", cynefin: "Prima bisogna uscire dalla confusione usando una procedura nota di verifica." },
+          { title: "Cancello tutto", text: "Se sembra sospetto, è sicuramente falso.", s: 6, t: 4, c: 4, bias: "Chiusura prematura: una conclusione senza verifica.", lesson: "Riduci il rischio immediato, ma perdi l'occasione di segnalare e proteggere altri utenti.", cynefin: "La procedura è in gran parte chiara: non interagire, conservare e segnalare." },
+          { title: "Verifico da un canale indipendente", text: "Non apro il link; contatto la segreteria dal sito ufficiale e segnalo il messaggio.", s: 10, t: 10, c: 10, bias: "Resisti a urgenza, autorità ed effetto gregge.", lesson: "Hai separato il fatto osservabile dall'interpretazione e verificato tramite un canale affidabile.", cynefin: "Osserva, classifica, rispondi: applichi una pratica nota senza estenderla oltre il contesto." }
+        ]
+      },
+      {
+        domain: "Caotico", risk: "Contenimento", title: "I file non si aprono più",
+        story: "Diversi computer mostrano file con nomi modificati. Alcuni utenti continuano a lavorare e salvare documenti sulla cartella condivisa.",
+        evidence: "Non sai ancora quale malware sia coinvolto. Il problema sembra propagarsi. Il tecnico sarà disponibile tra venti minuti.",
+        choices: [
+          { title: "Aspetto la diagnosi completa", text: "Non voglio agire senza conoscere la causa esatta.", s: 0, t: 5, c: 0, bias: "Bias dell'analisi: cercare certezza mentre il danno continua.", lesson: "La prudenza è utile, ma in una crisi l'inazione può amplificare il danno.", cynefin: "Nel caos si agisce per stabilizzare prima di svolgere un'analisi completa." },
+          { title: "Isolo i dispositivi coinvolti", text: "Interrompo le connessioni seguendo il piano di emergenza e avviso il responsabile.", s: 10, t: 9, c: 10, bias: "Eviti sia il panico sia l'attesa di informazioni perfette.", lesson: "La decisione è temporanea, reversibile e orientata a limitare la propagazione.", cynefin: "Agisci, osserva, rispondi: prima contieni, poi comprendi." },
+          { title: "Spengo tutti i sistemi della scuola", text: "Meglio bloccare tutto immediatamente.", s: 5, t: 2, c: 4, bias: "Reazione eccessiva e generalizzazione del rischio.", lesson: "Potresti interrompere servizi essenziali e compromettere informazioni utili all'indagine.", cynefin: "Nel caos serve azione, ma deve essere mirata al contenimento, non indiscriminata." }
+        ]
+      },
+      {
+        domain: "Complicato", risk: "Attribuzione", title: "Chi è stato?",
+        story: "Un post anonimo sostiene che l'attacco provenga da un gruppo specifico. Alcuni dettagli sembrano plausibili e la notizia viene condivisa rapidamente.",
+        evidence: "Non esiste ancora un rapporto forense. Il post non cita fonti verificabili. Tecniche simili possono essere imitate da gruppi diversi.",
+        choices: [
+          { title: "Condivido l'accusa", text: "I dettagli tecnici sembrano convincenti.", s: 1, t: 0, c: 2, bias: "Conferma, disponibilità e falsa autorità tecnica.", lesson: "La plausibilità non equivale a prova e un'accusa prematura può causare danni.", cynefin: "L'attribuzione è complicata: richiede competenze, dati e confronto tra ipotesi." },
+          { title: "Dico che è impossibile sapere", text: "Non ci si può fidare di nessuna analisi.", s: 5, t: 4, c: 3, bias: "Scetticismo assoluto e falso equilibrio.", lesson: "L'incertezza non rende tutte le ipotesi equivalenti: alcune possono essere più supportate di altre.", cynefin: "Un problema complicato può essere analizzato, anche se non produce certezza immediata." },
+          { title: "Sospendo il giudizio", text: "Separo indizi e conclusioni, attendo l'analisi forense e confronto fonti indipendenti.", s: 9, t: 10, c: 10, bias: "Riduci ancoraggio e conferma chiedendo prove discriminanti.", lesson: "Hai calibrato la fiducia senza trasformare l'incertezza in ignoranza totale.", cynefin: "Osserva, analizza, rispondi con il contributo di competenze diverse." }
+        ]
+      },
+      {
+        domain: "Complesso", risk: "Comunicazione", title: "La voce si diffonde",
+        story: "Studenti e famiglie chiedono spiegazioni sui social. Circolano voci secondo cui tutti i dati personali sarebbero stati pubblicati.",
+        evidence: "È confermato un incidente, ma non è ancora nota l'estensione. Silenzio e comunicazioni vaghe stanno aumentando la sfiducia.",
+        choices: [
+          { title: "Nego qualsiasi problema", text: "Serve evitare il panico finché non sappiamo tutto.", s: 1, t: 1, c: 0, bias: "Bias reputazionale e illusione del controllo.", lesson: "Una smentita non supportata può distruggere fiducia se emergono nuove informazioni.", cynefin: "La fiducia è complessa: le reazioni delle persone modificano il sistema." },
+          { title: "Pubblico ogni dettaglio disponibile", text: "La trasparenza assoluta risolve il problema.", s: 3, t: 4, c: 2, bias: "Soluzione unica e falsa dicotomia tra silenzio e divulgazione totale.", lesson: "Dettagli non verificati o sensibili possono aumentare rischio e disinformazione.", cynefin: "In un contesto complesso bisogna osservare gli effetti della comunicazione e adattarla." },
+          { title: "Comunico fatti, limiti e prossimo aggiornamento", text: "Spiego cosa sappiamo, cosa non sappiamo e quando forniremo nuove informazioni.", s: 9, t: 10, c: 10, bias: "Contrasti la pressione a riempire i vuoti con certezze premature.", lesson: "Una comunicazione iterativa rende visibile l'incertezza senza rinunciare alla responsabilità.", cynefin: "Sperimenta, osserva, adatta: comunica per piccoli cicli e ascolta le reazioni." }
+        ]
+      },
+      {
+        domain: "Complesso + Complicato", risk: "Decisione finale", title: "Pagare il riscatto?",
+        story: "Compare una richiesta di riscatto. Una persona afferma: “Pagare è l'unico modo per recuperare rapidamente tutto”. Un'altra sostiene: “Non bisogna pagare mai, in nessun caso”.",
+        evidence: "Esistono backup, ma non sono ancora stati verificati. Non è certo che il pagamento produca il recupero. Sono coinvolti aspetti tecnici, legali, etici e organizzativi.",
+        choices: [
+          { title: "Pago subito", text: "La priorità è tornare operativi.", s: 1, t: 1, c: 1, bias: "Urgenza, soluzione unica e avversione alla perdita.", lesson: "Il pagamento non garantisce il recupero e può introdurre ulteriori rischi.", cynefin: "Stai trattando un problema multidimensionale come se fosse chiaro." },
+          { title: "Rifiuto senza analizzare", text: "Pagare è sempre sbagliato.", s: 5, t: 3, c: 3, bias: "Regola assoluta applicata senza considerare il contesto.", lesson: "Il principio può essere ragionevole, ma la decisione richiede comunque dati, responsabilità e consulenza competente.", cynefin: "Le parti tecniche sono complicate e le conseguenze organizzative sono complesse." },
+          { title: "Attivo il processo di crisi", text: "Verifico backup e impatto, coinvolgo autorità ed esperti, valuto opzioni e conseguenze.", s: 10, t: 10, c: 10, bias: "Eviti la falsa dicotomia e mantieni aperte ipotesi verificabili.", lesson: "Non prometti una soluzione certa: costruisci una decisione documentata usando prove e competenze pertinenti.", cynefin: "Scomponi il problema e applichi strategie diverse alle sue componenti." }
+        ]
+      }
+    ];
+
+    let current = 0;
+    let total = 0;
+    let security = 0;
+    let thinking = 0;
+    let cynefin = 0;
+    let seconds = 60;
+    let timerId;
+
+    function startGame() {
+      $("start").classList.add("hidden");
+      $("game").style.display = "block";
+      current = 0; total = 0; security = 0; thinking = 0; cynefin = 0;
+      renderScenario();
+    }
+
+    function renderScenario() {
+      clearInterval(timerId);
+      seconds = 60;
+      const item = scenarios[current];
+      $("phaseLabel").textContent = `Fase ${current + 1} di ${scenarios.length}`;
+      $("progressFill").style.width = `${(current / scenarios.length) * 100}%`;
+      $("timer").textContent = `Tempo: ${seconds}s`;
+      $("points").textContent = total;
+      $("domain").textContent = item.domain;
+      $("risk").textContent = item.risk;
+      $("scenarioTitle").textContent = item.title;
+      $("scenarioStory").textContent = item.story;
+      $("scenarioEvidence").textContent = item.evidence;
+      $("feedback").classList.remove("show");
+      const choices = $("choices");
+      choices.replaceChildren();
+      item.choices.forEach((choice, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice";
+        const title = document.createElement("strong");
+        title.textContent = choice.title;
+        const text = document.createElement("span");
+        text.textContent = choice.text;
+        button.append(title, text);
+        button.addEventListener("click", () => selectChoice(index));
+        choices.append(button);
+      });
+      timerId = setInterval(() => {
+        seconds -= 1;
+        $("timer").textContent = `Tempo: ${seconds}s`;
+        if (seconds <= 0) {
+          clearInterval(timerId);
+          selectChoice(-1);
+        }
+      }, 1000);
+    }
+
+    function selectChoice(index) {
+      clearInterval(timerId);
+      document.querySelectorAll(".choice").forEach(button => button.disabled = true);
+      const choice = index >= 0 ? scenarios[current].choices[index] : {
+        s: 0, t: 0, c: 0,
+        bias: "Paralisi decisionale: attendere può essere una decisione con conseguenze.",
+        cynefin: "Il dominio orienta l'azione anche quando le informazioni sono incomplete.",
+        lesson: "Non servono informazioni perfette: serve una scelta prudente, motivata e aggiornabile."
+      };
+      const timeBonus = index >= 0 ? Math.min(5, Math.floor(seconds / 12)) : 0;
+      security += choice.s;
+      thinking += choice.t;
+      cynefin += choice.c;
+      const gained = choice.s + choice.t + choice.c + timeBonus;
+      total += gained;
+      $("points").textContent = total;
+      $("feedbackTitle").textContent = gained >= 28 ? "Decisione eccellente" : gained >= 16 ? "Decisione plausibile, ma migliorabile" : "Decisione ad alto rischio";
+      $("feedbackScore").textContent = `Hai ottenuto ${gained} punti${timeBonus ? `, inclusi ${timeBonus} per la rapidità` : ""}.`;
+      $("feedbackBias").textContent = choice.bias;
+      $("feedbackCynefin").textContent = choice.cynefin;
+      $("feedbackLesson").textContent = choice.lesson;
+      $("feedback").classList.add("show");
+      $("nextBtn").textContent = current === scenarios.length - 1 ? "Vedi il risultato" : "Prossima fase";
+    }
+
+    function next() {
+      current += 1;
+      if (current < scenarios.length) renderScenario();
+      else showResult();
+    }
+
+    function showResult() {
+      $("game").style.display = "none";
+      $("result").style.display = "block";
+      const name = $("playerName").value.trim() || "Agente";
+      const max = scenarios.length * 10;
+      const average = (security + thinking + cynefin) / (max * 3);
+      const level = average >= .85 ? "Stratega cyber" : average >= .6 ? "Analista consapevole" : "Apprendista investigatore";
+      $("resultTitle").textContent = `${name}, livello: ${level}`;
+      $("resultIntro").textContent = `Hai concluso la missione con ${total} punti. Il punteggio valuta il processo decisionale, non la capacità di indovinare una risposta “giusta” senza motivarla.`;
+      $("securityScore").textContent = `${security}/${max}`;
+      $("thinkingScore").textContent = `${thinking}/${max}`;
+      $("cynefinScore").textContent = `${cynefin}/${max}`;
+      const weakest = [
+        ["sicurezza", security],
+        ["pensiero critico", thinking],
+        ["uso di Cynefin", cynefin]
+      ].sort((a, b) => a[1] - b[1])[0][0];
+      $("debriefText").textContent = `La tua area principale di miglioramento è: ${weakest}. Ripercorri le decisioni chiedendoti quali fatti avevi, quali supposizioni hai aggiunto e se la tua azione era proporzionata al dominio Cynefin.`;
+    }
+
+    $("startBtn").addEventListener("click", startGame);
+    $("playerName").addEventListener("keydown", event => {
+      if (event.key === "Enter") startGame();
+    });
+    $("nextBtn").addEventListener("click", next);
+    $("replayBtn").addEventListener("click", () => {
+      $("result").style.display = "none";
+      $("start").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
