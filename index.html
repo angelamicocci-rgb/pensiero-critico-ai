@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClearLens — Palestra di pensiero critico sull'IA</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    button, textarea, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 0.625rem; background: var(--cp-accent); color: var(--cp-accent-fg);
+      font-weight: 800; letter-spacing: -1px;
+    }
+    .brand h1 { margin: 0; font-size: 20px; }
+    .brand p { margin: 2px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .pill {
+      padding: 7px 10px; border: 1px solid var(--cp-border); border-radius: 999px;
+      background: var(--cp-surface); color: var(--cp-text-muted); font-size: 12px;
+    }
+    .hero {
+      display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; margin-bottom: 16px;
+    }
+    .card {
+      background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+    }
+    .intro { padding: 28px; overflow: hidden; position: relative; }
+    .eyebrow { color: var(--cp-accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .intro h2 { margin: 8px 0 10px; max-width: 720px; font-size: clamp(30px, 5vw, 52px); line-height: 1.04; letter-spacing: -.04em; }
+    .intro p { margin: 0; max-width: 680px; color: var(--cp-text-muted); font-size: 16px; line-height: 1.6; }
+    .principles { padding: 22px; display: grid; gap: 12px; }
+    .principle { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; }
+    .principle-num {
+      width: 34px; height: 34px; display: grid; place-items: center; border-radius: 0.625rem;
+      background: var(--cp-accent-soft); color: var(--cp-accent); font-weight: 800;
+    }
+    .principle strong { display: block; margin-bottom: 3px; }
+    .principle span { color: var(--cp-text-muted); font-size: 13px; line-height: 1.4; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+    .composer { padding: 22px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .section-head h3 { margin: 0; font-size: 18px; }
+    .section-head span { color: var(--cp-text-muted); font-size: 12px; }
+    label { display: block; margin: 14px 0 7px; font-size: 13px; font-weight: 700; }
+    textarea {
+      width: 100%; min-height: 108px; resize: vertical; padding: 12px 14px;
+      border: 1px solid var(--cp-border); border-radius: 0.625rem; outline: none;
+      background: var(--cp-bg-elevated); color: var(--cp-text); line-height: 1.5;
+    }
+    textarea:focus { border-color: var(--cp-accent); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+    #answer { min-height: 180px; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+    .suggestions { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--cp-border); }
+    .suggestions h4 { margin: 0 0 4px; font-size: 14px; }
+    .suggestions > p { margin: 0 0 10px; color: var(--cp-text-muted); font-size: 12px; }
+    .suggestion-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .suggestion-chip {
+      border: 1px solid var(--cp-border); border-radius: 999px; padding: 7px 10px;
+      background: var(--cp-bg-elevated); color: var(--cp-text); font-size: 12px;
+    }
+    .suggestion-chip:hover { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .btn {
+      border: 1px solid var(--cp-border); border-radius: 0.625rem; padding: 10px 14px;
+      background: var(--cp-surface); color: var(--cp-text); font-weight: 700;
+    }
+    .btn:hover { background: var(--cp-surface-soft); }
+    .btn.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .btn.primary:hover { background: var(--cp-accent-hover); }
+    .btn.ghost { color: var(--cp-text-muted); }
+    .status { margin-left: auto; color: var(--cp-text-muted); font-size: 12px; }
+    .sidebar { display: grid; gap: 16px; }
+    .score-card { padding: 22px; }
+    .score-row { display: grid; grid-template-columns: 94px 1fr; gap: 16px; align-items: center; }
+    .score {
+      width: 94px; height: 94px; display: grid; place-items: center; border-radius: 50%;
+      border: 10px solid var(--cp-accent-soft); outline: 2px solid var(--cp-accent);
+    }
+    .score strong { display: block; font-size: 30px; line-height: 1; text-align: center; }
+    .score span { display: block; margin-top: 2px; color: var(--cp-text-muted); font-size: 11px; text-align: center; }
+    .score-copy h3 { margin: 0 0 5px; }
+    .score-copy p { margin: 0; color: var(--cp-text-muted); font-size: 13px; line-height: 1.45; }
+    .meter-list { display: grid; gap: 10px; margin-top: 18px; }
+    .meter-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
+    .meter-head span:last-child { color: var(--cp-text-muted); }
+    .track { height: 7px; overflow: hidden; border-radius: 999px; background: var(--cp-surface-soft); }
+    .fill { height: 100%; width: 0; border-radius: inherit; background: var(--cp-accent); transition: width .45s ease; }
+    .findings { padding: 22px; }
+    .empty { padding: 16px; border: 1px dashed var(--cp-border-strong); border-radius: 0.625rem; color: var(--cp-text-muted); font-size: 13px; line-height: 1.5; }
+    .finding-list { display: grid; gap: 10px; }
+    .finding {
+      padding: 12px; border: 1px solid var(--cp-border); border-radius: 0.625rem;
+      background: var(--cp-bg-elevated);
+    }
+    .finding-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .finding strong { font-size: 13px; }
+    .tag { padding: 3px 7px; border-radius: 999px; background: var(--cp-accent-soft); color: var(--cp-accent); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .finding p { margin: 6px 0 0; color: var(--cp-text-muted); font-size: 12px; line-height: 1.45; }
+    .guide { padding: 22px; }
+    .guide-step { padding: 10px 0; border-bottom: 1px solid var(--cp-border); }
+    .guide-step:last-child { padding-bottom: 0; border-bottom: 0; }
+    .guide-step strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .guide-step p { margin: 0; color: var(--cp-text-muted); font-size: 12px; line-height: 1.45; }
+    .comment-template {
+      margin-top: 14px; padding: 12px; border-radius: 0.625rem;
+      background: var(--cp-accent-soft); color: var(--cp-text); font-size: 12px; line-height: 1.5;
+    }
+    .challenge { margin-top: 16px; padding: 22px; }
+    .challenge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .challenge button {
+      min-height: 112px; padding: 14px; text-align: left; border: 1px solid var(--cp-border);
+      border-radius: 0.625rem; background: var(--cp-bg-elevated); color: var(--cp-text);
+    }
+    .challenge button:hover, .challenge button.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .challenge button strong { display: block; margin-bottom: 6px; }
+    .challenge button span { color: var(--cp-text-muted); font-size: 12px; line-height: 1.4; }
+    .prompt-box { display: none; margin-top: 12px; padding: 14px; border-left: 4px solid var(--cp-accent); background: var(--cp-accent-soft); border-radius: 0 0.625rem 0.625rem 0; }
+    .prompt-box.show { display: block; }
+    .prompt-box p { margin: 0; font-size: 14px; line-height: 1.5; }
+    .prompt-box small { display: block; margin-top: 8px; color: var(--cp-text-muted); }
+    footer { margin-top: 18px; text-align: center; color: var(--cp-text-muted); font-size: 12px; }
+    @media (max-width: 900px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+      header { align-items: flex-start; }
+      .pill { display: none; }
+      .intro { padding: 22px; }
+      .sidebar, .challenge-grid { grid-template-columns: 1fr; }
+      .status { width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">
+        <div class="mark">CL</div>
+        <div><h1>ClearLens</h1><p>Pensiero critico per le risposte dell'IA</p></div>
+      </div>
+      <div class="header-actions">
+        <span class="pill">Privato · funziona nel browser</span>
+        <button class="btn ghost" id="resetBtn" type="button">Azzera</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="card intro">
+        <div class="eyebrow">Le risposte dell'IA meritano un secondo sguardo</div>
+        <h2>Non limitarti a ricevere una risposta. Mettila in discussione.</h2>
+        <p>Incolla una risposta dell'IA ed esplora le sue supposizioni, le prospettive mancanti, i segnali di eccessiva certezza e le lacune nelle prove. L'obiettivo non è “smascherare” l'IA, ma affinare il tuo giudizio.</p>
+      </div>
+      <div class="card principles">
+        <div class="principle"><div class="principle-num">1</div><div><strong>Separa l'affermazione dalla sicurezza</strong><span>Una frase convincente può comunque essere incerta o priva di sostegno.</span></div></div>
+        <div class="principle"><div class="principle-num">2</div><div><strong>Cerca i punti di vista omessi</strong><span>Ogni inquadramento rende meno visibili alcune persone, prove o compromessi.</span></div></div>
+        <div class="principle"><div class="principle-num">3</div><div><strong>Chiedi cosa cambierebbe la risposta</strong><span>Una risposta solida dovrebbe resistere a controesempi e nuove prove.</span></div></div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section>
+        <div class="card composer">
+          <div class="section-head"><h3>Laboratorio dei bias</h3><span>Strumento didattico euristico, non un verdetto sui fatti</span></div>
+          <label for="question">La tua domanda o il tuo prompt</label>
+          <textarea id="question" placeholder="Esempio: Il lavoro da remoto è migliore di quello in ufficio?"></textarea>
+          <label for="answer">La risposta dell'IA</label>
+          <textarea id="answer" placeholder="Incolla la risposta che vuoi esaminare…"></textarea>
+          <div class="toolbar">
+            <button class="btn primary" id="analyzeBtn" type="button">Analizza la risposta</button>
+            <button class="btn" id="exampleBtn" type="button">Prova un esempio</button>
+            <span class="status" id="status">Pronto quando vuoi</span>
+          </div>
+          <div class="suggestions">
+            <h4>Domande da provare</h4>
+            <p>Scegli temi in cui contesto, valori e prospettive possono cambiare la risposta.</p>
+            <div class="suggestion-list" id="suggestionList"></div>
+          </div>
+        </div>
+
+        <div class="card challenge">
+          <div class="section-head"><h3>Metti alla prova la risposta</h3><span>Scegli una strategia di ragionamento</span></div>
+          <div class="challenge-grid">
+            <button type="button" data-challenge="evidence"><strong>Verifica delle prove</strong><span>Quali affermazioni richiedono fonti, numeri o verifiche?</span></button>
+            <button type="button" data-challenge="perspective"><strong>Cambio di prospettiva</strong><span>Chi potrebbe non essere d'accordo e cosa noterebbe?</span></button>
+            <button type="button" data-challenge="falsify"><strong>Prova a confutarla</strong><span>Quale controesempio indebolirebbe la conclusione?</span></button>
+          </div>
+          <div class="prompt-box" id="promptBox"><p id="challengePrompt"></p><small>Usalo come prompt successivo con qualsiasi assistente IA.</small></div>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="card score-card">
+          <div class="score-row">
+            <div class="score"><div><strong id="score">—</strong><span>punteggio di riflessione</span></div></div>
+            <div class="score-copy"><h3 id="scoreTitle">Non analizzata</h3><p id="scoreSummary">Aggiungi una risposta per scoprire dove può essere utile approfondire.</p></div>
+          </div>
+          <div class="meter-list">
+            <div><div class="meter-head"><span>Prove</span><span id="evidenceValue">—</span></div><div class="track"><div class="fill" id="evidenceFill"></div></div></div>
+            <div><div class="meter-head"><span>Sfumature</span><span id="nuanceValue">—</span></div><div class="track"><div class="fill" id="nuanceFill"></div></div></div>
+            <div><div class="meter-head"><span>Prospettive</span><span id="perspectiveValue">—</span></div><div class="track"><div class="fill" id="perspectiveFill"></div></div></div>
+          </div>
+        </div>
+
+        <div class="card findings">
+          <div class="section-head"><h3>Segnali da esaminare</h3><span id="findingCount">0 trovati</span></div>
+          <div id="findings"><div class="empty">L'analisi evidenzia schemi linguistici che possono segnalare eccessiva sicurezza, prove deboli, una visione unilaterale o generalizzazioni.</div></div>
+        </div>
+
+        <div class="card guide">
+          <div class="section-head"><h3>Come commentare</h3><span>Metodo in 5 mosse</span></div>
+          <div class="guide-step"><strong>1. Distingui fatti e interpretazioni</strong><p>Indica quali parti sono verificabili e quali esprimono una valutazione o una previsione.</p></div>
+          <div class="guide-step"><strong>2. Nomina il possibile bias</strong><p>Usa formule prudenti: “potrebbe esserci”, “questa formulazione rischia di”, “manca il punto di vista di”.</p></div>
+          <div class="guide-step"><strong>3. Chiedi le prove</strong><p>Domanda fonte, data, campione, contesto e limiti. Una citazione non basta se non è pertinente o affidabile.</p></div>
+          <div class="guide-step"><strong>4. Cerca cosa è stato escluso</strong><p>Aggiungi controesempi, gruppi coinvolti, costi, benefici e condizioni in cui la conclusione non vale.</p></div>
+          <div class="guide-step"><strong>5. Riscrivi in modo calibrato</strong><p>Sostituisci certezze assolute con condizioni, probabilità e ciò che potrebbe cambiare la conclusione.</p></div>
+          <div class="comment-template"><strong>Formula utile:</strong> “La risposta sostiene che… Le prove indicate sono… Potrebbe esserci un bias di… perché… Manca… Per non darlo per assodato verificherei… Una formulazione più equilibrata sarebbe…”</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>ClearLens ti aiuta a porre domande migliori. Non determina la verità né le intenzioni.</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const question = $("question");
+    const answer = $("answer");
+
+    const rules = [
+      {
+        name: "Eccessiva sicurezza",
+        tag: "certezza",
+        pattern: /\b(sempre|mai|sicuramente|certamente|ovviamente|indiscutibilmente|senza dubbio|chiaramente)\b/gi,
+        detail: "Un linguaggio assoluto può nascondere incertezze, eccezioni o prove controverse."
+      },
+      {
+        name: "Generalizzazione ampia",
+        tag: "inquadramento",
+        pattern: /\b(tutti|nessuno|tutte le persone|la maggior parte delle persone|in generale|il migliore|il peggiore)\b/gi,
+        detail: "Un'affermazione generale su una popolazione può richiedere limiti, dati rappresentativi o controesempi."
+      },
+      {
+        name: "Attribuzione debole",
+        tag: "prove",
+        pattern: /\b(gli esperti dicono|gli studi dimostrano|la ricerca prova|è risaputo|molti credono|i dati mostrano)\b/gi,
+        detail: "La risposta richiama un'autorità senza identificare fonte, metodo, data o ambito."
+      },
+      {
+        name: "Linguaggio connotato",
+        tag: "linguaggio",
+        pattern: /\b(ridicolo|pericoloso|pigro|inevitabile|disastroso|superiore|inferiore|fallimentare)\b/gi,
+        detail: "Parole emotivamente connotate possono orientare il giudizio prima che le prove siano valutate."
+      },
+      {
+        name: "Spiegazione monocausale",
+        tag: "causalità",
+        pattern: /\b(il motivo è|causato da|a causa di questo|questo dimostra che|quindi deve)\b/gi,
+        detail: "Un'affermazione causale può ignorare fattori confondenti, spiegazioni alternative o causalità inversa."
+      }
+    ];
+
+    const challenges = {
+      evidence: "Esamina la risposta affermazione per affermazione. Per ogni affermazione fattuale o causale, indica quali prove potrebbero verificarla, quale sarebbe la fonte più autorevole disponibile e cosa rimane incerto.",
+      perspective: "Riscrivi la risposta dal punto di vista di una persona ragionevole che non è d'accordo. Identifica gruppi coinvolti, incentivi, compromessi e contesto che l'inquadramento originale potrebbe aver omesso.",
+      falsify: "Agisci come un revisore scettico. Fornisci tre controesempi plausibili, descrivi quali prove cambierebbero la conclusione e separa le affermazioni solide dalle supposizioni fragili."
+    };
+
+    const suggestedQuestions = [
+      "L'intelligenza artificiale renderà inutile la maggior parte dei lavori?",
+      "Il lavoro da remoto rende le persone più produttive?",
+      "I social media fanno male agli adolescenti?",
+      "L'università è ancora un buon investimento?",
+      "Le auto elettriche sono davvero più sostenibili?",
+      "Una leadership forte è più efficace di una leadership partecipativa?",
+      "Le notizie online sono meno affidabili di quelle tradizionali?",
+      "I test standardizzati misurano davvero l'intelligenza?",
+      "La tecnologia migliora sempre la qualità della vita?",
+      "È giusto usare l'IA per selezionare i candidati a un lavoro?"
+    ];
+
+    function countMatches(text, pattern) {
+      return [...text.matchAll(new RegExp(pattern.source, pattern.flags))].length;
+    }
+
+    function setMeter(name, value) {
+      $(name + "Value").textContent = value + "%";
+      $(name + "Fill").style.width = value + "%";
+    }
+
+    function renderFinding(item) {
+      const node = document.createElement("div");
+      node.className = "finding";
+      const top = document.createElement("div");
+      top.className = "finding-top";
+      const title = document.createElement("strong");
+      title.textContent = item.name;
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = item.tag;
+      const detail = document.createElement("p");
+      detail.textContent = item.detail + (item.matches ? " Rilevat" + (item.matches > 1 ? "i " : "o ") + item.matches + " segnal" + (item.matches > 1 ? "i." : "e.") : "");
+      top.append(title, tag);
+      node.append(top, detail);
+      return node;
+    }
+
+    function analyze() {
+      const text = answer.value.trim();
+      if (!text) {
+        $("status").textContent = "Inserisci prima una risposta dell'IA";
+        answer.focus();
+        return;
+      }
+
+      const words = text.toLowerCase().match(/\b[\w’'-]+\b/g) || [];
+      const findings = rules.map(rule => ({ ...rule, matches: countMatches(text, rule.pattern) })).filter(rule => rule.matches);
+      const citations = (text.match(/https?:\/\/|doi:|secondo|fonte:|\[\d+\]|\(\d{4}\)/gi) || []).length;
+      const nuanceTerms = (text.match(/\b(tuttavia|sebbene|dipende|può|potrebbe|in alcuni casi|d'altra parte|compromesso|incerto|contesto)\b/gi) || []).length;
+      const perspectiveTerms = (text.match(/\b(critici|sostenitori|portatori di interesse|prospettiva|alcuni sostengono|altri|per esempio|controargomentazione|coinvolti)\b/gi) || []).length;
+      const absolutes = findings.filter(f => f.tag === "certezza" || f.tag === "inquadramento").reduce((sum, f) => sum + f.matches, 0);
+
+      const lengthFactor = Math.min(18, Math.floor(words.length / 18));
+      const evidence = Math.max(12, Math.min(96, 28 + citations * 18 + lengthFactor - absolutes * 5));
+      const nuance = Math.max(10, Math.min(96, 30 + nuanceTerms * 10 + lengthFactor - absolutes * 6));
+      const perspective = Math.max(10, Math.min(96, 24 + perspectiveTerms * 12 + Math.floor(lengthFactor / 2) - absolutes * 4));
+      const score = Math.round((evidence + nuance + perspective) / 3);
+
+      $("score").textContent = score;
+      $("scoreTitle").textContent = score >= 76 ? "Buona capacità di riflessione" : score >= 51 ? "Merita un esame più attento" : "Metti in discussione la risposta";
+      $("scoreSummary").textContent = score >= 76
+        ? "La risposta mostra utili segnali di prove, cautela e ampiezza di prospettiva."
+        : score >= 51
+          ? "Sono presenti alcuni segnali di pensiero critico, ma le affermazioni importanti potrebbero richiedere verifiche più rigorose."
+          : "La risposta può sembrare convincente, ma offre prove, sfumature o punti di vista alternativi limitati.";
+      setMeter("evidence", evidence);
+      setMeter("nuance", nuance);
+      setMeter("perspective", perspective);
+
+      const container = $("findings");
+      container.replaceChildren();
+      if (!findings.length) {
+        container.append(renderFinding({
+          name: "Nessun segnale linguistico evidente",
+          tag: "prossimo passo",
+          detail: "Questo non dimostra neutralità o accuratezza. Verifica la qualità delle fonti, il contesto mancante e quali prospettive sono assenti."
+        }));
+      } else {
+        const list = document.createElement("div");
+        list.className = "finding-list";
+        findings.forEach(f => list.append(renderFinding(f)));
+        container.append(list);
+      }
+      $("findingCount").textContent = findings.length + (findings.length === 1 ? " trovato" : " trovati");
+      $("status").textContent = "Analisi completata";
+    }
+
+    $("analyzeBtn").addEventListener("click", analyze);
+    suggestedQuestions.forEach(text => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "suggestion-chip";
+      button.textContent = text;
+      button.addEventListener("click", () => {
+        question.value = text;
+        answer.value = "";
+        $("status").textContent = "Domanda selezionata: chiedila a un'IA e incolla qui la risposta";
+        answer.focus();
+      });
+      $("suggestionList").append(button);
+    });
+    $("exampleBtn").addEventListener("click", () => {
+      question.value = "Il lavoro da remoto è migliore del lavoro in ufficio?";
+      answer.value = "Il lavoro da remoto è chiaramente la scelta migliore per tutti. Gli studi dimostrano che i dipendenti sono sempre più produttivi a casa perché gli uffici causano distrazioni. Le aziende che impongono la presenza in ufficio usano un modello superato, quindi le politiche orientate al lavoro remoto produrranno inevitabilmente risultati migliori.";
+      $("status").textContent = "Esempio caricato";
+      analyze();
+    });
+    $("resetBtn").addEventListener("click", () => {
+      question.value = "";
+      answer.value = "";
+      $("score").textContent = "—";
+      $("scoreTitle").textContent = "Non analizzata";
+      $("scoreSummary").textContent = "Aggiungi una risposta per scoprire dove può essere utile approfondire.";
+      ["evidence", "nuance", "perspective"].forEach(name => {
+        $(name + "Value").textContent = "—";
+        $(name + "Fill").style.width = "0";
+      });
+      $("findings").innerHTML = '<div class="empty">L\'analisi evidenzia schemi linguistici che possono segnalare eccessiva sicurezza, prove deboli, una visione unilaterale o generalizzazioni.</div>';
+      $("findingCount").textContent = "0 trovati";
+      $("promptBox").classList.remove("show");
+      document.querySelectorAll("[data-challenge]").forEach(btn => btn.classList.remove("active"));
+      $("status").textContent = "Pronto quando vuoi";
+    });
+
+    document.querySelectorAll("[data-challenge]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-challenge]").forEach(btn => btn.classList.toggle("active", btn === button));
+        $("challengePrompt").textContent = challenges[button.dataset.challenge];
+        $("promptBox").classList.add("show");
+      });
+    });
+  </script>
+</body>
+</html>
