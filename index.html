@@ -154,6 +154,18 @@
     .score-copy h3 { margin: 0 0 5px; }
     .score-copy p { margin: 0; color: var(--cp-text-muted); font-size: 13px; line-height: 1.45; }
     .meter-list { display: grid; gap: 10px; margin-top: 18px; }
+    .cynefin { padding: 22px; }
+    .domain-badge {
+      display: inline-flex; margin-bottom: 10px; padding: 5px 9px; border-radius: 999px;
+      background: var(--cp-accent-soft); color: var(--cp-accent); font-size: 11px; font-weight: 800;
+    }
+    .cynefin h4 { margin: 0 0 6px; font-size: 16px; }
+    .cynefin p { margin: 0; color: var(--cp-text-muted); font-size: 12px; line-height: 1.5; }
+    .cynefin-action {
+      margin-top: 12px; padding: 10px; border: 1px solid var(--cp-border);
+      border-radius: 0.625rem; background: var(--cp-bg-elevated);
+    }
+    .cynefin-action strong { display: block; margin-bottom: 3px; font-size: 12px; }
     .meter-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 12px; }
     .meter-head span:last-child { color: var(--cp-text-muted); }
     .track { height: 7px; overflow: hidden; border-radius: 999px; background: var(--cp-surface-soft); }
@@ -276,19 +288,31 @@
           </div>
         </div>
 
+        <div class="card cynefin">
+          <div class="section-head"><h3>Lente Cynefin</h3><span>Classificazione provvisoria</span></div>
+          <span class="domain-badge" id="cynefinDomain">Da determinare</span>
+          <h4 id="cynefinTitle">Analizza una risposta</h4>
+          <p id="cynefinReason">Il modello Cynefin aiuta a capire quale tipo di ragionamento usare in base alla natura del problema, non a dichiarare automaticamente vera o falsa una risposta.</p>
+          <div class="cynefin-action">
+            <strong>Strategia consigliata</strong>
+            <p id="cynefinAction">Prima identifica il contesto e verifica se può essere suddiviso in parti con caratteristiche diverse.</p>
+          </div>
+        </div>
+
         <div class="card findings">
           <div class="section-head"><h3>Segnali da esaminare</h3><span id="findingCount">0 trovati</span></div>
           <div id="findings"><div class="empty">L'analisi evidenzia schemi linguistici che possono segnalare eccessiva sicurezza, prove deboli, una visione unilaterale o generalizzazioni.</div></div>
         </div>
 
         <div class="card guide">
-          <div class="section-head"><h3>Come commentare</h3><span>Metodo in 5 mosse</span></div>
+          <div class="section-head"><h3>Come commentare</h3><span>Pensiero critico + Cynefin</span></div>
           <div class="guide-step"><strong>1. Distingui fatti e interpretazioni</strong><p>Indica quali parti sono verificabili e quali esprimono una valutazione o una previsione.</p></div>
           <div class="guide-step"><strong>2. Nomina il possibile bias</strong><p>Usa formule prudenti: “potrebbe esserci”, “questa formulazione rischia di”, “manca il punto di vista di”.</p></div>
           <div class="guide-step"><strong>3. Chiedi le prove</strong><p>Domanda fonte, data, campione, contesto e limiti. Una citazione non basta se non è pertinente o affidabile.</p></div>
           <div class="guide-step"><strong>4. Cerca cosa è stato escluso</strong><p>Aggiungi controesempi, gruppi coinvolti, costi, benefici e condizioni in cui la conclusione non vale.</p></div>
-          <div class="guide-step"><strong>5. Riscrivi in modo calibrato</strong><p>Sostituisci certezze assolute con condizioni, probabilità e ciò che potrebbe cambiare la conclusione.</p></div>
-          <div class="comment-template"><strong>Formula utile:</strong> “La risposta sostiene che… Le prove indicate sono… Potrebbe esserci un bias di… perché… Manca… Per non darlo per assodato verificherei… Una formulazione più equilibrata sarebbe…”</div>
+          <div class="guide-step"><strong>5. Applica la lente Cynefin</strong><p>Chiedi se il problema è chiaro, complicato, complesso, caotico o ancora confuso. Contesti diversi richiedono modi diversi di decidere.</p></div>
+          <div class="guide-step"><strong>6. Riscrivi in modo calibrato</strong><p>Sostituisci certezze assolute con condizioni, probabilità, piccoli esperimenti e ciò che potrebbe cambiare la conclusione.</p></div>
+          <div class="comment-template"><strong>Formula utile:</strong> “La risposta sostiene che… Le prove indicate sono… Potrebbe esserci un bias di… perché… Nel modello Cynefin il contesto sembra… ma verificherei… La strategia più adatta è… Una formulazione più equilibrata sarebbe…”</div>
         </div>
       </aside>
     </div>
@@ -353,6 +377,63 @@
       "È giusto usare l'IA per selezionare i candidati a un lavoro?"
     ];
 
+    const cynefinDomains = {
+      caotico: {
+        label: "Caotico",
+        title: "Prima stabilizzare, poi comprendere",
+        reason: "Il testo richiama urgenza, crisi o necessità di intervento immediato. In questo dominio causa ed effetto non sono ancora leggibili.",
+        action: "Agisci → osserva → rispondi. Riduci il danno, crea stabilità e solo dopo cerca spiegazioni. Diffida delle analisi complete formulate troppo presto."
+      },
+      complesso: {
+        label: "Complesso",
+        title: "Esplorare prima di concludere",
+        reason: "Il problema coinvolge comportamento umano, società, apprendimento o sistemi che cambiano nel tempo. Le relazioni causa-effetto emergono spesso solo dopo.",
+        action: "Sperimenta → osserva → adatta. Cerca più prospettive, prova piccoli esperimenti sicuri e considera la risposta come un'ipotesi, non come una previsione certa."
+      },
+      complicato: {
+        label: "Complicato",
+        title: "Analizzare con competenze diverse",
+        reason: "Il problema sembra analizzabile, ma può richiedere dati, diagnosi tecnica o il confronto tra più soluzioni valide.",
+        action: "Osserva → analizza → rispondi. Confronta fonti ed esperti indipendenti, esplicita i criteri e verifica perché una soluzione sarebbe preferibile alle alternative."
+      },
+      chiaro: {
+        label: "Chiaro",
+        title: "Verificare regole ed eccezioni",
+        reason: "Il problema appare ripetibile e governato da pratiche note. Anche qui bisogna controllare che la regola sia davvero stabile nel contesto descritto.",
+        action: "Osserva → classifica → rispondi. Verifica la procedura, i dati di base e le eccezioni. Evita di estendere una regola semplice a situazioni che non le assomigliano."
+      },
+      confuso: {
+        label: "Confuso",
+        title: "Non classificare troppo presto",
+        reason: "Le informazioni disponibili non permettono di capire con sicurezza quale dominio descriva meglio il problema, oppure il problema contiene parti diverse.",
+        action: "Scomponi la domanda, raccogli contesto e separa gli aspetti chiari, complicati, complessi o caotici prima di scegliere una strategia."
+      }
+    };
+
+    function classifyCynefin(questionText, answerText) {
+      const text = (questionText + " " + answerText).toLowerCase();
+      const count = pattern => (text.match(pattern) || []).length;
+      const scores = {
+        caotico: count(/\b(emergenza|crisi|immediato|urgente|collasso|pericolo imminente|disastro)\b/g) * 3,
+        complesso: count(/\b(società|sociale|persone|comportamento|cultura|leadership|educazione|adolescenti|innovazione|ecosistema|dipende|imprevedibile|evolve)\b/g) * 2,
+        complicato: count(/\b(tecnico|diagnosi|ingegneria|algoritmo|dati|specialista|esperto|ottimizzare|progettare|confrontare)\b/g) * 2,
+        chiaro: count(/\b(procedura|regola|istruzioni|passaggi|standard|ripetibile|obbligatorio|calcolare)\b/g) * 2
+      };
+      const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      if (!ranked[0][1]) return "confuso";
+      if (ranked[1] && ranked[0][1] === ranked[1][1]) return "confuso";
+      return ranked[0][0];
+    }
+
+    function renderCynefin(questionText, answerText) {
+      const key = classifyCynefin(questionText, answerText);
+      const domain = cynefinDomains[key];
+      $("cynefinDomain").textContent = domain.label;
+      $("cynefinTitle").textContent = domain.title;
+      $("cynefinReason").textContent = domain.reason;
+      $("cynefinAction").textContent = domain.action;
+    }
+
     function countMatches(text, pattern) {
       return [...text.matchAll(new RegExp(pattern.source, pattern.flags))].length;
     }
@@ -399,6 +480,7 @@
       const nuance = Math.max(10, Math.min(96, 30 + nuanceTerms * 10 + lengthFactor - absolutes * 6));
       const perspective = Math.max(10, Math.min(96, 24 + perspectiveTerms * 12 + Math.floor(lengthFactor / 2) - absolutes * 4));
       const score = Math.round((evidence + nuance + perspective) / 3);
+      renderCynefin(question.value.trim(), text);
 
       $("score").textContent = score;
       $("scoreTitle").textContent = score >= 76 ? "Buona capacità di riflessione" : score >= 51 ? "Merita un esame più attento" : "Metti in discussione la risposta";
@@ -455,6 +537,10 @@
       $("score").textContent = "—";
       $("scoreTitle").textContent = "Non analizzata";
       $("scoreSummary").textContent = "Aggiungi una risposta per scoprire dove può essere utile approfondire.";
+      $("cynefinDomain").textContent = "Da determinare";
+      $("cynefinTitle").textContent = "Analizza una risposta";
+      $("cynefinReason").textContent = "Il modello Cynefin aiuta a capire quale tipo di ragionamento usare in base alla natura del problema, non a dichiarare automaticamente vera o falsa una risposta.";
+      $("cynefinAction").textContent = "Prima identifica il contesto e verifica se può essere suddiviso in parti con caratteristiche diverse.";
       ["evidence", "nuance", "perspective"].forEach(name => {
         $(name + "Value").textContent = "—";
         $(name + "Fill").style.width = "0";
