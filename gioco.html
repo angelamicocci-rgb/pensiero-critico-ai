@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cyber Crisis — Gioco di pensiero critico</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -96,6 +98,14 @@
     .mission strong { display: block; margin-bottom: 5px; font-size: 13px; }
     .mission span { color: var(--cp-text-muted); font-size: 12px; line-height: 1.4; }
     .name-row { display: flex; gap: 8px; max-width: 480px; margin: 0 auto; }
+    .privacy {
+      max-width: 640px; margin: 12px auto 0; padding: 12px; text-align: left;
+      border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated);
+    }
+    .privacy label { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; line-height: 1.45; }
+    .privacy input { flex: none; width: 16px; height: 16px; margin-top: 2px; }
+    .privacy p { margin: 7px 0 0 25px; color: var(--cp-text-muted); font-size: 11px; line-height: 1.4; }
+    .form-error { min-height: 18px; margin-top: 8px; color: var(--cp-danger); font-size: 12px; }
     input {
       flex: 1; min-width: 0; padding: 11px 13px; border: 1px solid var(--cp-border);
       border-radius: 0.625rem; background: var(--cp-bg-elevated); color: var(--cp-text); outline: none;
@@ -151,6 +161,8 @@
     .debrief h3 { margin: 0 0 8px; }
     .debrief p { margin: 5px 0; font-size: 13px; line-height: 1.5; }
     .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .save-status { margin-top: 12px; color: var(--cp-text-muted); font-size: 12px; }
+    .source-link { display: inline-block; margin-top: 8px; font-size: 12px; }
     .hidden { display: none !important; }
     @media (max-width: 650px) {
       .mission-grid, .score-grid { grid-template-columns: 1fr; }
@@ -170,16 +182,22 @@
     <section class="card start" id="start">
       <div class="eyebrow">Missione interattiva</div>
       <h2>La rete della scuola è sotto attacco.</h2>
-      <p>Hai cinque decisioni per contenere l'incidente. Le informazioni saranno incomplete: dovrai verificare le prove, riconoscere i bias e scegliere una strategia coerente con il modello Cynefin.</p>
+      <p>Hai dieci decisioni su cybersecurity, rischi dell'IA e AI Act. Le informazioni saranno incomplete: dovrai verificare le prove, riconoscere i bias e scegliere una strategia coerente con il modello Cynefin.</p>
       <div class="mission-grid">
         <div class="mission"><strong>Difendi</strong><span>Riduci il rischio senza compiere azioni impulsive o irreversibili.</span></div>
         <div class="mission"><strong>Ragiona</strong><span>Distingui fatti, ipotesi, pressioni sociali e false certezze.</span></div>
         <div class="mission"><strong>Adatta</strong><span>Usa una strategia diversa nei contesti chiari, complicati, complessi e caotici.</span></div>
       </div>
       <div class="name-row">
-        <input id="playerName" maxlength="30" placeholder="Il tuo nome o nickname" aria-label="Nome o nickname">
+        <input id="playerName" maxlength="30" placeholder="Nickname anonimo" aria-label="Nickname anonimo">
+        <input id="classCode" maxlength="20" placeholder="Codice lezione" aria-label="Codice lezione">
         <button class="btn primary" id="startBtn" type="button">Inizia la missione</button>
       </div>
+      <div class="privacy">
+        <label><input id="consent" type="checkbox"> Acconsento all'invio del nickname, del codice lezione, delle scelte e dei punteggi al docente.</label>
+        <p>Non inserire nome, cognome, e-mail o altri dati personali. I risultati servono solo al debrief didattico.</p>
+      </div>
+      <div class="form-error" id="formError" role="alert"></div>
     </section>
 
     <section class="game" id="game">
@@ -202,6 +220,7 @@
           <p><strong>Possibile bias:</strong> <span id="feedbackBias"></span></p>
           <p><strong>Lente Cynefin:</strong> <span id="feedbackCynefin"></span></p>
           <p class="lesson" id="feedbackLesson"></p>
+          <a class="source-link hidden" id="feedbackSource" target="_blank" rel="noopener noreferrer">Approfondisci sulla fonte ufficiale UE</a>
           <div class="feedback-footer"><button class="btn primary" id="nextBtn" type="button">Prossima fase</button></div>
         </div>
       </article>
@@ -225,6 +244,7 @@
         <button class="btn primary" id="replayBtn" type="button">Gioca di nuovo</button>
         <a class="btn" href="index.html">Analizza una risposta IA</a>
       </div>
+      <p class="save-status" id="saveStatus"></p>
     </section>
   </main>
 
@@ -280,6 +300,61 @@
           { title: "Rifiuto senza analizzare", text: "Pagare è sempre sbagliato.", s: 5, t: 3, c: 3, bias: "Regola assoluta applicata senza considerare il contesto.", lesson: "Il principio può essere ragionevole, ma la decisione richiede comunque dati, responsabilità e consulenza competente.", cynefin: "Le parti tecniche sono complicate e le conseguenze organizzative sono complesse." },
           { title: "Attivo il processo di crisi", text: "Verifico backup e impatto, coinvolgo autorità ed esperti, valuto opzioni e conseguenze.", s: 10, t: 10, c: 10, bias: "Eviti la falsa dicotomia e mantieni aperte ipotesi verificabili.", lesson: "Non prometti una soluzione certa: costruisci una decisione documentata usando prove e competenze pertinenti.", cynefin: "Scomponi il problema e applichi strategie diverse alle sue componenti." }
         ]
+      },
+      {
+        domain: "Complicato", risk: "AI Act · classificazione", title: "Un tutor IA è sempre ad alto rischio?",
+        story: "La scuola vuole adottare un chatbot che spiega gli esercizi, ma non assegna voti, non decide l'ammissione e non crea profili degli studenti. Qualcuno afferma: “Qualsiasi IA usata a scuola è automaticamente ad alto rischio”.",
+        evidence: "Nell'AI Act il rischio dipende dall'uso previsto e dall'impatto. Alcuni sistemi educativi che determinano accesso, valutazione o percorso professionale possono essere ad alto rischio; non ogni strumento didattico lo è.",
+        source: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        choices: [
+          { title: "Lo vieto subito", text: "Se usa IA nell'istruzione, è certamente ad alto rischio.", s: 3, t: 2, c: 2, bias: "Generalizzazione e classificazione per etichetta anziché per uso previsto.", lesson: "Il settore da solo non basta: bisogna analizzare funzione, impatto e persone coinvolte.", cynefin: "È un problema complicato: classifica il caso concreto usando criteri normativi e competenze pertinenti." },
+          { title: "Lo considero a rischio minimo", text: "È solo un chatbot, quindi non serve alcuna verifica.", s: 1, t: 2, c: 2, bias: "Normalizzazione del rischio e fiducia nell'etichetta del prodotto.", lesson: "Anche un sistema non classificato ad alto rischio può richiedere privacy, trasparenza, sicurezza e supervisione.", cynefin: "Una prima classificazione non elimina la necessità di analizzare il contesto d'uso." },
+          { title: "Valuto funzione e impatto", text: "Documento l'uso previsto, verifico dati, trasparenza, supervisione e possibili effetti sugli studenti.", s: 10, t: 10, c: 10, bias: "Eviti sia l'allarmismo sia l'automatismo tecnologico.", lesson: "La classificazione del rischio è contestuale e non sostituisce una valutazione responsabile.", cynefin: "Osserva, analizza, rispondi con criteri espliciti e revisione competente." }
+        ]
+      },
+      {
+        domain: "Chiaro + Complicato", risk: "AI Act · pratica vietata", title: "Riconoscere le emozioni in classe",
+        story: "Un fornitore propone webcam con IA per stimare attenzione, stress e motivazione degli studenti durante le lezioni.",
+        evidence: "L'AI Act include il riconoscimento delle emozioni nelle istituzioni educative tra le pratiche vietate, salvo eccezioni limitate previste dalla normativa.",
+        source: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        choices: [
+          { title: "Avvio un test nascosto", text: "Se dura solo una settimana, possiamo provarlo senza informare nessuno.", s: 0, t: 0, c: 1, bias: "Eccezionalismo sperimentale e tecnosoluzionismo.", lesson: "Chiamare un uso “pilota” non annulla divieti, diritti o responsabilità.", cynefin: "Quando una regola applicabile è chiara, non si trasforma il problema in un esperimento." },
+          { title: "Accetto se il modello è accurato", text: "Un'elevata accuratezza rende l'uso legittimo.", s: 1, t: 3, c: 2, bias: "Bias dell'accuratezza: confondere prestazione tecnica e liceità.", lesson: "Un sistema può essere accurato e restare inaccettabile per finalità, contesto o impatto sui diritti.", cynefin: "L'analisi tecnica è complicata, ma non supera una proibizione normativa pertinente." },
+          { title: "Sospendo la proposta", text: "Verifico formalmente l'applicabilità del divieto e cerco alternative non biometriche.", s: 10, t: 10, c: 10, bias: "Eviti di assumere che innovazione e conformità coincidano.", lesson: "Prima viene la verifica della pratica consentita; poi si valutano soluzioni proporzionate.", cynefin: "Classifica secondo la regola applicabile e coinvolgi competenze legali per le eccezioni." }
+        ]
+      },
+      {
+        domain: "Complesso", risk: "IA · bias nei dati", title: "Il modello penalizza alcuni studenti",
+        story: "Un sistema suggerisce chi dovrebbe ricevere attività avanzate. I risultati sembrano favorire studenti provenienti da scuole e contesti già più rappresentati nei dati storici.",
+        evidence: "L'accuratezza media è alta, ma gli errori non sono distribuiti in modo uniforme. Le decisioni potrebbero influenzare opportunità educative.",
+        source: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        choices: [
+          { title: "Mantengo il sistema", text: "La media è buona, quindi il modello è imparziale.", s: 0, t: 1, c: 1, bias: "Bias dell'aggregazione: la media nasconde impatti diversi tra gruppi.", lesson: "Prestazione complessiva e equità non sono sinonimi.", cynefin: "Gli effetti sociali emergono nel tempo e richiedono osservazione per sottogruppi." },
+          { title: "Elimino ogni automazione", text: "Un errore dimostra che nessuna IA può essere utile.", s: 5, t: 4, c: 3, bias: "Generalizzazione da un singolo esito e pensiero binario.", lesson: "La criticità richiede correzioni e garanzie, non una conclusione universale su ogni sistema.", cynefin: "Nel complesso si sperimenta in sicurezza, si misura e si adatta." },
+          { title: "Sospendo l'uso decisionale", text: "Analizzo gli errori per gruppo, coinvolgo gli interessati e introduco revisione umana e ricorso.", s: 10, t: 10, c: 10, bias: "Contrasti automazione, aggregazione e conferma con dati disaggregati.", lesson: "Qualità dei dati, supervisione umana e monitoraggio sono essenziali quando sono in gioco opportunità.", cynefin: "Sperimenta, osserva gli effetti e adatta con soglie di sicurezza chiare." }
+        ]
+      },
+      {
+        domain: "Chiaro", risk: "AI Act · trasparenza", title: "Il video del preside",
+        story: "Per risparmiare tempo viene creato con IA un video realistico del preside che annuncia una nuova regola scolastica.",
+        evidence: "Il video può essere scambiato per autentico. Le regole di trasparenza dell'AI Act prevedono obblighi di riconoscibilità o etichettatura per determinati contenuti sintetici e deepfake.",
+        source: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        choices: [
+          { title: "Lo pubblico senza etichetta", text: "Il messaggio è corretto, quindi non conta come è stato prodotto.", s: 1, t: 1, c: 2, bias: "Outcome bias: il fine corretto viene usato per ignorare il processo.", lesson: "L'autenticità percepita influenza fiducia e capacità di valutare il contenuto.", cynefin: "Esiste una pratica di trasparenza applicabile: rendere riconoscibile il contenuto sintetico." },
+          { title: "Aggiungo una nota nascosta", text: "Basta indicarlo nei metadati o in fondo alla pagina.", s: 5, t: 5, c: 5, bias: "Compliance cosmetica: rispettare la forma senza rendere l'informazione utile.", lesson: "La trasparenza deve essere percepibile e comprensibile alle persone interessate.", cynefin: "Applica la regola in modo funzionale, non meramente formale." },
+          { title: "Etichetto chiaramente il video", text: "Indico in modo visibile che voce e immagine sono sintetiche e offro il testo ufficiale.", s: 10, t: 10, c: 10, bias: "Riduci l'effetto autorità e l'inganno percettivo.", lesson: "La trasparenza permette agli utenti di interpretare correttamente origine e affidabilità.", cynefin: "Osserva, classifica, rispondi applicando una misura nota e verificabile." }
+        ]
+      },
+      {
+        domain: "Complicato + Complesso", risk: "AI governance", title: "L'IA decide chi viene assunto",
+        story: "Un'azienda usa un sistema per ordinare automaticamente i CV. Il responsabile dice: “L'algoritmo è oggettivo e ci fa risparmiare tempo”.",
+        evidence: "Gli strumenti IA per occupazione e selezione possono rientrare tra i sistemi ad alto rischio. Sono rilevanti gestione del rischio, qualità dei dati, documentazione, registrazione, accuratezza, cybersicurezza e supervisione umana.",
+        source: "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        choices: [
+          { title: "Accetto la classifica", text: "Un algoritmo non ha pregiudizi personali.", s: 0, t: 0, c: 1, bias: "Automation bias e falsa neutralità dei dati.", lesson: "Un modello può riprodurre o amplificare criteri storici e proxy discriminatori.", cynefin: "La verifica tecnica è complicata; gli effetti sulle persone sono complessi." },
+          { title: "Aggiungo una firma umana finale", text: "Se una persona conferma il risultato, la supervisione è garantita.", s: 5, t: 5, c: 5, bias: "Human-washing: presenza formale senza capacità reale di contestare il sistema.", lesson: "La supervisione deve essere informata, competente e in grado di modificare o rifiutare l'output.", cynefin: "Non basta un passaggio rituale: servono analisi e osservazione degli effetti." },
+          { title: "Imposto governance e ricorso", text: "Valuto il rischio, testo gli impatti, documento il sistema e garantisco revisione umana e contestazione.", s: 10, t: 10, c: 10, bias: "Contrasti falsa neutralità, automazione e conferma.", lesson: "La conformità richiede misure lungo il ciclo di vita, non solo una verifica al termine.", cynefin: "Combina analisi esperta con monitoraggio adattivo degli effetti sulle persone." }
+        ]
       }
     ];
 
@@ -290,11 +365,29 @@
     let cynefin = 0;
     let seconds = 60;
     let timerId;
+    let startedAt;
+    let decisions = [];
+    let saveAttempted = false;
+    const config = window.CYBER_CRISIS_CONFIG || {};
+    const databaseEnabled = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
+    const database = databaseEnabled
+      ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey)
+      : null;
 
     function startGame() {
+      const alias = $("playerName").value.trim();
+      const classCode = $("classCode").value.trim();
+      if (alias.length < 2 || classCode.length < 2 || !$("consent").checked) {
+        $("formError").textContent = "Inserisci nickname e codice lezione, poi conferma il consenso informativo.";
+        return;
+      }
+      $("formError").textContent = "";
       $("start").classList.add("hidden");
       $("game").style.display = "block";
       current = 0; total = 0; security = 0; thinking = 0; cynefin = 0;
+      decisions = [];
+      saveAttempted = false;
+      startedAt = new Date();
       renderScenario();
     }
 
@@ -357,6 +450,24 @@
       $("feedbackBias").textContent = choice.bias;
       $("feedbackCynefin").textContent = choice.cynefin;
       $("feedbackLesson").textContent = choice.lesson;
+      const source = $("feedbackSource");
+      if (scenarios[current].source) {
+        source.href = scenarios[current].source;
+        source.classList.remove("hidden");
+      } else {
+        source.classList.add("hidden");
+        source.removeAttribute("href");
+      }
+      decisions.push({
+        scenario_index: current,
+        scenario_title: scenarios[current].title,
+        selected_choice: index,
+        choice_title: index >= 0 ? choice.title : "Tempo scaduto",
+        security_score: choice.s,
+        thinking_score: choice.t,
+        cynefin_score: choice.c,
+        time_remaining: seconds
+      });
       $("feedback").classList.add("show");
       $("nextBtn").textContent = current === scenarios.length - 1 ? "Vedi il risultato" : "Prossima fase";
     }
@@ -367,7 +478,7 @@
       else showResult();
     }
 
-    function showResult() {
+    async function showResult() {
       $("game").style.display = "none";
       $("result").style.display = "block";
       const name = $("playerName").value.trim() || "Agente";
@@ -385,6 +496,35 @@
         ["uso di Cynefin", cynefin]
       ].sort((a, b) => a[1] - b[1])[0][0];
       $("debriefText").textContent = `La tua area principale di miglioramento è: ${weakest}. Ripercorri le decisioni chiedendoti quali fatti avevi, quali supposizioni hai aggiunto e se la tua azione era proporzionata al dominio Cynefin.`;
+      await saveResult(level);
+    }
+
+    async function saveResult(level) {
+      if (saveAttempted) return;
+      saveAttempted = true;
+      const status = $("saveStatus");
+      if (!databaseEnabled) {
+        status.textContent = "Risultato conservato solo in questa pagina: la raccolta docente non è ancora configurata.";
+        return;
+      }
+      status.textContent = "Invio anonimo del risultato in corso…";
+      const payload = {
+        player_alias: $("playerName").value.trim(),
+        class_code: $("classCode").value.trim().toUpperCase(),
+        total_score: total,
+        security_score: security,
+        thinking_score: thinking,
+        cynefin_score: cynefin,
+        max_dimension_score: scenarios.length * 10,
+        level,
+        duration_seconds: Math.max(0, Math.round((new Date() - startedAt) / 1000)),
+        answers: decisions,
+        game_version: "2.0"
+      };
+      const { error } = await database.from("game_results").insert(payload);
+      status.textContent = error
+        ? "Il risultato non è stato inviato. Avvisa il docente e conserva il punteggio mostrato."
+        : "Risultato anonimo inviato al docente.";
     }
 
     $("startBtn").addEventListener("click", startGame);
