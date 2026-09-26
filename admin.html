@@ -102,6 +102,7 @@
         <input id="password" type="password" autocomplete="current-password" required>
         <button class="btn primary" type="submit">Accedi</button>
         <button class="text-button" id="forgotBtn" type="button">Password dimenticata?</button>
+        <p class="setup">Il pulsante non apre subito un'altra pagina: Supabase invia un'e-mail. Apri il messaggio ricevuto e usa il link per tornare qui e scegliere la nuova password.</p>
       </form>
       <p class="message" id="loginMessage" role="alert"></p>
     </section>
@@ -317,7 +318,11 @@
         return;
       }
       $("loginMessage").textContent = "Invio del link di recupero…";
-      const redirectTo = `${window.location.origin}${window.location.pathname}`;
+      const redirectTo = config.adminUrl || (
+        window.location.protocol === "file:"
+          ? "https://angelamicocci-rgb.github.io/pensiero-critico-ai/admin.html"
+          : `${window.location.origin}${window.location.pathname}`
+      );
       const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
       $("loginMessage").textContent = error
         ? "Non è stato possibile inviare il link. Verifica l'e-mail e la configurazione URL di Supabase."
