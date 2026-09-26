@@ -45,6 +45,14 @@
     }
     .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
     .login .btn { width: 100%; margin-top: 16px; }
+    .text-button {
+      width: 100%; margin-top: 10px; padding: 6px; border: 0; background: transparent;
+      color: var(--accent); font-weight: 700; text-decoration: underline;
+    }
+    .password-panel { width: min(520px, 100%); margin: 18px auto 0; }
+    .password-panel h2 { margin-top: 0; }
+    .password-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .password-actions .btn { flex: 1; }
     .message { min-height: 18px; margin-top: 10px; color: var(--danger); font-size: 12px; }
     .setup { padding: 14px; border-left: 4px solid var(--accent); background: var(--soft); line-height: 1.5; font-size: 13px; }
     .dashboard { display: none; }
@@ -93,8 +101,25 @@
         <label for="password">Password</label>
         <input id="password" type="password" autocomplete="current-password" required>
         <button class="btn primary" type="submit">Accedi</button>
+        <button class="text-button" id="forgotBtn" type="button">Password dimenticata?</button>
       </form>
       <p class="message" id="loginMessage" role="alert"></p>
+    </section>
+
+    <section class="card password-panel hidden" id="passwordPanel">
+      <h2 id="passwordTitle">Cambia password</h2>
+      <p id="passwordHelp">Scegli una nuova password di almeno 10 caratteri.</p>
+      <form id="passwordForm">
+        <label for="newPassword">Nuova password</label>
+        <input id="newPassword" type="password" minlength="10" autocomplete="new-password" required>
+        <label for="confirmPassword">Conferma nuova password</label>
+        <input id="confirmPassword" type="password" minlength="10" autocomplete="new-password" required>
+        <div class="password-actions">
+          <button class="btn primary" type="submit">Salva password</button>
+          <button class="btn" id="cancelPasswordBtn" type="button">Annulla</button>
+        </div>
+      </form>
+      <p class="message" id="passwordMessage" role="alert"></p>
     </section>
 
     <section class="dashboard" id="dashboard">
@@ -105,6 +130,7 @@
         </div>
         <button class="btn" id="refreshBtn" type="button">Aggiorna</button>
         <button class="btn" id="exportBtn" type="button">Esporta CSV</button>
+        <button class="btn" id="changePasswordBtn" type="button">Cambia password</button>
         <button class="btn" id="logoutBtn" type="button">Esci</button>
       </div>
       <div class="metrics">
@@ -134,16 +160,34 @@
     const enabled = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
     const db = enabled ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey) : null;
     let results = [];
+    let recoveryMode = false;
 
     function showLogin(message = "") {
       $("dashboard").style.display = "none";
+      $("passwordPanel").classList.add("hidden");
       $("login").classList.remove("hidden");
       $("loginMessage").textContent = message;
     }
 
     function showDashboard() {
       $("login").classList.add("hidden");
+      $("passwordPanel").classList.add("hidden");
       $("dashboard").style.display = "block";
+    }
+
+    function showPasswordPanel(isRecovery = false) {
+      recoveryMode = isRecovery;
+      $("login").classList.add("hidden");
+      $("dashboard").style.display = "none";
+      $("passwordPanel").classList.remove("hidden");
+      $("passwordTitle").textContent = isRecovery ? "Imposta una nuova password" : "Cambia password";
+      $("passwordHelp").textContent = isRecovery
+        ? "Hai aperto il link di recupero. Scegli una nuova password di almeno 10 caratteri."
+        : "Scegli una nuova password di almeno 10 caratteri.";
+      $("passwordMessage").textContent = "";
+      $("newPassword").value = "";
+      $("confirmPassword").value = "";
+      $("newPassword").focus();
     }
 
     function safeCsv(value) {
@@ -264,6 +308,51 @@
       await loadResults();
     });
 
+    $("forgotBtn").addEventListener("click", async () => {
+      if (!enabled) return;
+      const email = $("email").value.trim();
+      if (!email) {
+        $("loginMessage").textContent = "Inserisci prima l'e-mail docente.";
+        $("email").focus();
+        return;
+      }
+      $("loginMessage").textContent = "Invio del link di recupero…";
+      const redirectTo = `${window.location.origin}${window.location.pathname}`;
+      const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+      $("loginMessage").textContent = error
+        ? "Non è stato possibile inviare il link. Verifica l'e-mail e la configurazione URL di Supabase."
+        : "Se l'account esiste, riceverai un'e-mail con il link per impostare una nuova password.";
+    });
+
+    $("changePasswordBtn").addEventListener("click", () => showPasswordPanel(false));
+    $("cancelPasswordBtn").addEventListener("click", () => {
+      if (recoveryMode) showLogin("Puoi richiedere un nuovo link di recupero.");
+      else showDashboard();
+    });
+
+    $("passwordForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const password = $("newPassword").value;
+      if (password !== $("confirmPassword").value) {
+        $("passwordMessage").textContent = "Le due password non coincidono.";
+        return;
+      }
+      if (password.length < 10) {
+        $("passwordMessage").textContent = "La password deve contenere almeno 10 caratteri.";
+        return;
+      }
+      $("passwordMessage").textContent = "Aggiornamento in corso…";
+      const { error } = await db.auth.updateUser({ password });
+      if (error) {
+        $("passwordMessage").textContent = "La password non è stata aggiornata. Il link potrebbe essere scaduto.";
+        return;
+      }
+      recoveryMode = false;
+      showDashboard();
+      $("dashboardMessage").textContent = "Password aggiornata correttamente.";
+      await loadResults();
+    });
+
     $("classFilter").addEventListener("change", render);
     $("refreshBtn").addEventListener("click", loadResults);
     $("exportBtn").addEventListener("click", exportCsv);
@@ -283,6 +372,12 @@
         showDashboard();
         await loadResults();
       }
+    }
+
+    if (enabled) {
+      db.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" && session) showPasswordPanel(true);
+      });
     }
 
     init();

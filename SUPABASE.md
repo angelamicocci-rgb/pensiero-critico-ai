@@ -22,6 +22,10 @@ usarli nell'area docente:
 7. In **Authentication > URL Configuration**, aggiungere:
    `https://angelamicocci-rgb.github.io/pensiero-critico-ai/admin.html`
 
+Questa URL è necessaria anche per il pulsante **Password dimenticata?**. Il link
+ricevuto via e-mail riporta all'area docente, dove viene mostrato il modulo per
+impostare la nuova password.
+
 ## Privacy
 
 - Usare solo nickname o codici anonimi.
