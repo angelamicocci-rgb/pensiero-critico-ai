@@ -4,8 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cyber Crisis — Gioco di pensiero critico</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
-  <script src="config.js"></script>
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -98,13 +96,6 @@
     .mission strong { display: block; margin-bottom: 5px; font-size: 13px; }
     .mission span { color: var(--cp-text-muted); font-size: 12px; line-height: 1.4; }
     .name-row { display: flex; gap: 8px; max-width: 480px; margin: 0 auto; }
-    .privacy {
-      max-width: 640px; margin: 12px auto 0; padding: 12px; text-align: left;
-      border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated);
-    }
-    .privacy label { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; line-height: 1.45; }
-    .privacy input { flex: none; width: 16px; height: 16px; margin-top: 2px; }
-    .privacy p { margin: 7px 0 0 25px; color: var(--cp-text-muted); font-size: 11px; line-height: 1.4; }
     .form-error { min-height: 18px; margin-top: 8px; color: var(--cp-danger); font-size: 12px; }
     input {
       flex: 1; min-width: 0; padding: 11px 13px; border: 1px solid var(--cp-border);
@@ -161,7 +152,6 @@
     .debrief h3 { margin: 0 0 8px; }
     .debrief p { margin: 5px 0; font-size: 13px; line-height: 1.5; }
     .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-    .save-status { margin-top: 12px; color: var(--cp-text-muted); font-size: 12px; }
     .source-link { display: inline-block; margin-top: 8px; font-size: 12px; }
     .hidden { display: none !important; }
     @media (max-width: 650px) {
@@ -189,15 +179,10 @@
         <div class="mission"><strong>Adatta</strong><span>Usa una strategia diversa nei contesti chiari, complicati, complessi e caotici.</span></div>
       </div>
       <div class="name-row">
-        <input id="playerName" maxlength="30" placeholder="Nickname anonimo" aria-label="Nickname anonimo">
-        <input id="classCode" maxlength="20" placeholder="Codice lezione" aria-label="Codice lezione">
+        <input id="playerName" maxlength="30" placeholder="Nickname facoltativo" aria-label="Nickname facoltativo">
         <button class="btn primary" id="startBtn" type="button">Inizia la missione</button>
       </div>
-      <div class="privacy">
-        <label><input id="consent" type="checkbox"> Acconsento all'invio del nickname, del codice lezione, delle scelte e dei punteggi al docente.</label>
-        <p>Non inserire nome, cognome, e-mail o altri dati personali. I risultati servono solo al debrief didattico.</p>
-      </div>
-      <div class="form-error" id="formError" role="alert"></div>
+      <p class="form-error">Nessun dato viene inviato o salvato: punteggio e feedback restano solo in questa pagina.</p>
     </section>
 
     <section class="game" id="game">
@@ -244,7 +229,6 @@
         <button class="btn primary" id="replayBtn" type="button">Gioca di nuovo</button>
         <a class="btn" href="index.html">Analizza una risposta IA</a>
       </div>
-      <p class="save-status" id="saveStatus"></p>
     </section>
   </main>
 
@@ -365,29 +349,11 @@
     let cynefin = 0;
     let seconds = 60;
     let timerId;
-    let startedAt;
-    let decisions = [];
-    let saveAttempted = false;
-    const config = window.CYBER_CRISIS_CONFIG || {};
-    const databaseEnabled = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
-    const database = databaseEnabled
-      ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey)
-      : null;
 
     function startGame() {
-      const alias = $("playerName").value.trim();
-      const classCode = $("classCode").value.trim();
-      if (alias.length < 2 || classCode.length < 2 || !$("consent").checked) {
-        $("formError").textContent = "Inserisci nickname e codice lezione, poi conferma il consenso informativo.";
-        return;
-      }
-      $("formError").textContent = "";
       $("start").classList.add("hidden");
       $("game").style.display = "block";
       current = 0; total = 0; security = 0; thinking = 0; cynefin = 0;
-      decisions = [];
-      saveAttempted = false;
-      startedAt = new Date();
       renderScenario();
     }
 
@@ -458,16 +424,6 @@
         source.classList.add("hidden");
         source.removeAttribute("href");
       }
-      decisions.push({
-        scenario_index: current,
-        scenario_title: scenarios[current].title,
-        selected_choice: index,
-        choice_title: index >= 0 ? choice.title : "Tempo scaduto",
-        security_score: choice.s,
-        thinking_score: choice.t,
-        cynefin_score: choice.c,
-        time_remaining: seconds
-      });
       $("feedback").classList.add("show");
       $("nextBtn").textContent = current === scenarios.length - 1 ? "Vedi il risultato" : "Prossima fase";
     }
@@ -478,7 +434,7 @@
       else showResult();
     }
 
-    async function showResult() {
+    function showResult() {
       $("game").style.display = "none";
       $("result").style.display = "block";
       const name = $("playerName").value.trim() || "Agente";
@@ -496,35 +452,6 @@
         ["uso di Cynefin", cynefin]
       ].sort((a, b) => a[1] - b[1])[0][0];
       $("debriefText").textContent = `La tua area principale di miglioramento è: ${weakest}. Ripercorri le decisioni chiedendoti quali fatti avevi, quali supposizioni hai aggiunto e se la tua azione era proporzionata al dominio Cynefin.`;
-      await saveResult(level);
-    }
-
-    async function saveResult(level) {
-      if (saveAttempted) return;
-      saveAttempted = true;
-      const status = $("saveStatus");
-      if (!databaseEnabled) {
-        status.textContent = "Risultato conservato solo in questa pagina: la raccolta docente non è ancora configurata.";
-        return;
-      }
-      status.textContent = "Invio anonimo del risultato in corso…";
-      const payload = {
-        player_alias: $("playerName").value.trim(),
-        class_code: $("classCode").value.trim().toUpperCase(),
-        total_score: total,
-        security_score: security,
-        thinking_score: thinking,
-        cynefin_score: cynefin,
-        max_dimension_score: scenarios.length * 10,
-        level,
-        duration_seconds: Math.max(0, Math.round((new Date() - startedAt) / 1000)),
-        answers: decisions,
-        game_version: "2.0"
-      };
-      const { error } = await database.from("game_results").insert(payload);
-      status.textContent = error
-        ? "Il risultato non è stato inviato. Avvisa il docente e conserva il punteggio mostrato."
-        : "Risultato anonimo inviato al docente.";
     }
 
     $("startBtn").addEventListener("click", startGame);
